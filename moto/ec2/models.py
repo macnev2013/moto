@@ -128,6 +128,7 @@ from .utils import (
     randor_ipv4_cidr,
     random_launch_template_id,
     random_nat_gateway_id,
+    random_transit_gateway_id,
     random_key_pair,
     random_private_ip,
     random_public_ip,
@@ -5869,6 +5870,56 @@ class CustomerGatewayBackend(object):
         return deleted
 
 
+class TransitGateway(CloudFormationModel):
+
+    VALID_OPTIONS = {
+        ""
+    }
+
+    def __init__(self, backend, description=None, options=None, tags=[]):
+        self.id = random_transit_gateway_id()
+        self.description = description
+        self.state = "available"
+        self.tags = tags
+        print("option:", options)
+        self.options = options
+
+        self._created_at = datetime.utcnow()
+        self._backend = backend
+
+    @property
+    def physical_resource_id(self):
+        return self.id
+
+    @property
+    def create_time(self):
+        return iso_8601_datetime_with_milliseconds(self._created_at)
+
+    @property
+    def owner_id(self):
+        return ACCOUNT_ID
+
+    @staticmethod
+    def cloudformation_name_type():
+        return None
+
+    @staticmethod
+    def cloudformation_type():
+        # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-natgateway.html
+        return "AWS::EC2::TransitGateway"
+
+    @classmethod
+    def create_from_cloudformation_json(
+        cls, resource_name, cloudformation_json, region_name
+    ):
+        ec2_backend = ec2_backends[region_name]
+        transit_gateway = ec2_backend.create_transit_gateway(
+            cloudformation_json["Properties"]["Description"],
+            cloudformation_json["Properties"]["Options"],
+        )
+        return transit_gateway
+
+
 class NatGateway(CloudFormationModel):
     def __init__(self, backend, subnet_id, allocation_id, tags=[]):
         # public properties
@@ -5931,6 +5982,37 @@ class NatGateway(CloudFormationModel):
             cloudformation_json["Properties"]["AllocationId"],
         )
         return nat_gateway
+
+
+class TransitGatewayBackend(object):
+    def __init__(self):
+        self.transit_gateways = {}
+        super(TransitGatewayBackend, self).__init__()
+
+    def create_transit_gateway(self, description=None, options=None, tags=[]):
+        transit_gateway = TransitGateway(self, description, options, tags)
+        self.transit_gateways[transit_gateway.id] = transit_gateway
+        return transit_gateway
+
+    def get_all_transit_gateways(self, filters):
+        transit_gateways = self.transit_gateways.values()
+
+        if filters is not None:
+            if filters.get("transit-gateway-id") is not None:
+                transit_gateways = [
+                    transit_gateway
+                    for transit_gateway in transit_gateways
+                    if transit_gateway.id in filters["transit-gateway-id"]
+                ]
+            if filters.get("state") is not None:
+                transit_gateways = [
+                    transit_gateway
+                    for transit_gateway in transit_gateways
+                    if transit_gateway.state in filters["state"]
+                ]
+
+        return transit_gateways
+
 
 
 class NatGatewayBackend(object):
@@ -6228,6 +6310,7 @@ class EC2Backend(
     VpnGatewayBackend,
     CustomerGatewayBackend,
     NatGatewayBackend,
+    TransitGatewayBackend,
     LaunchTemplateBackend,
     IamInstanceProfileAssociationBackend,
 ):
