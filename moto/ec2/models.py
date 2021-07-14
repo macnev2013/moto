@@ -5872,16 +5872,11 @@ class CustomerGatewayBackend(object):
 
 class TransitGateway(CloudFormationModel):
 
-    VALID_OPTIONS = {
-        ""
-    }
-
     def __init__(self, backend, description=None, options=None, tags=[]):
         self.id = random_transit_gateway_id()
         self.description = description
         self.state = "available"
         self.tags = tags
-        print("option:", options)
         self.options = options
 
         self._created_at = datetime.utcnow()
@@ -6013,6 +6008,8 @@ class TransitGatewayBackend(object):
 
         return transit_gateways
 
+    def delete_transit_gateway(self, transit_gateway_id):
+        return self.transit_gateways.pop(transit_gateway_id)
 
 
 class NatGatewayBackend(object):
