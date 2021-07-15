@@ -5,11 +5,13 @@ from moto.ec2.utils import filters_from_querystring
 
 class TransitGateways(BaseResponse):
     def create_transit_gateway(self):
-        description = self._get_param("Description")
+        description = self._get_param("Description") or None
         options = self._get_multi_param_helper("Options")
         tags = self._get_multi_param("TagSpecification")
-        if tags:
-            tags = tags[0].get("Tag")
+        tags = tags[0] if isinstance(tags, list) and len(tags) == 1 else tags
+        tags = (tags or {}).get("Tag", [])
+        tags = {t["Key"]: t["Value"] for t in tags}
+
         transit_gateway = self.ec2_backend.create_transit_gateway(
             description=description, options=options, tags=tags
         )
@@ -18,7 +20,7 @@ class TransitGateways(BaseResponse):
 
     def delete_transit_gateway(self):
         transit_gateway_id = self._get_param("TransitGatewayId")
-        transit_gateway = self.ec2_backend.delete_nat_gateway(transit_gateway_id)
+        transit_gateway = self.ec2_backend.delete_transit_gateway(transit_gateway_id)
         template = self.response_template(DELETE_TRANSIT_GATEWAY_RESPONSE)
         return template.render(transit_gateway=transit_gateway)
 
@@ -69,7 +71,7 @@ DESCRIBE_TRANSIT_GATEWAY_RESPONSE = """<DescribeTransitGatewaysResponse xmlns="h
     {% for transit_gateway in transit_gateways %}
         <item>
             <creationTime>{{ transit_gateway.create_time }}</creationTime>
-            <description>{{ transit_gateway.description }}</description>
+            <description>{{ transit_gateway.description if transit_gateway.description != None }}</description>
             {% if transit_gateway.options %}
                 <options>
                     <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn }}</amazonSideAsn>
@@ -84,16 +86,14 @@ DESCRIBE_TRANSIT_GATEWAY_RESPONSE = """<DescribeTransitGatewaysResponse xmlns="h
             {% endif %}
             <ownerId>{{ transit_gateway.owner_id }}</ownerId>
             <state>{{ transit_gateway.state }}</state>
-            {% if transit_gateway.tags %}
             <tagSet>
-                {% for tag in transit_gateway.tags %}
+                {% for tag in transit_gateway.get_tags() %}
                     <item>
-                    <key>{{ tag['Key'] }}</key>
-                    <value>{{ tag['Value'] }}</value>
+                        <key>{{ tag.key }}</key>
+                        <value>{{ tag.value }}</value>
                     </item>
                 {% endfor %}
             </tagSet>
-            {% endif %}
             <transitGatewayArn>arn:aws:ec2:us-east-1:{{ transit_gateway.owner_id }}:transit-gateway/{{ transit_gateway.id }}</transitGatewayArn>
             <transitGatewayId>{{ transit_gateway.id }}</transitGatewayId>
         </item>

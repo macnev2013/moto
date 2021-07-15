@@ -5870,13 +5870,14 @@ class CustomerGatewayBackend(object):
         return deleted
 
 
-class TransitGateway(CloudFormationModel):
+class TransitGateway(TaggedEC2Resource, CloudFormationModel):
 
     def __init__(self, backend, description=None, options=None, tags=[]):
+        self.ec2_backend = backend
         self.id = random_transit_gateway_id()
         self.description = description
         self.state = "available"
-        self.tags = tags
+        self.add_tags(tags or {})
         self.options = options
 
         self._created_at = datetime.utcnow()
