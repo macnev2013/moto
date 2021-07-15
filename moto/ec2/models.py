@@ -5881,7 +5881,6 @@ class TransitGateway(TaggedEC2Resource, CloudFormationModel):
         self.options = options
 
         self._created_at = datetime.utcnow()
-        self._backend = backend
 
     @property
     def physical_resource_id(self):

@@ -41,26 +41,24 @@ CREATE_TRANSIT_GATEWAY_RESPONSE = """<CreateTransitGatewayResponse xmlns="http:/
         <state>{{ transit_gateway.state }}</state>
         {% if transit_gateway.options %}
             <options>
-                <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn }}</amazonSideAsn>
-                <associationDefaultRouteTableId>tgw-rtb-002573ed1eEXAMPLE</associationDefaultRouteTableId>
-                <autoAcceptSharedAttachments>{{ transit_gateway.options.AutoAcceptSharedAttachments }}</autoAcceptSharedAttachments>
-                <defaultRouteTableAssociation>{{ transit_gateway.options.DefaultRouteTableAssociation }}</defaultRouteTableAssociation>
-                <defaultRouteTablePropagation>{{ transit_gateway.options.DefaultRouteTablePropagation }}</defaultRouteTablePropagation>
-                <dnsSupport>{{ transit_gateway.options.DnsSupport }}</dnsSupport>
-                <propagationDefaultRouteTableId>tgw-rtb-002573ed1eEXAMPLE</propagationDefaultRouteTableId>
-                <vpnEcmpSupport>{{ transit_gateway.options.VpnEcmpSupport }}</vpnEcmpSupport>
+                <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn or "64512" }}</amazonSideAsn>
+                <associationDefaultRouteTableId>{{ transit_gateway.options.AutoAcceptSharedAttachments or "tgw-rtb-0d571391e50cf8514" }}</associationDefaultRouteTableId>
+                <autoAcceptSharedAttachments>{{ transit_gateway.options.AutoAcceptSharedAttachments or "disable" }}</autoAcceptSharedAttachments>
+                <defaultRouteTableAssociation>{{ transit_gateway.options.DefaultRouteTableAssociation or "enable" }}</defaultRouteTableAssociation>
+                <defaultRouteTablePropagation>{{ transit_gateway.options.DefaultRouteTablePropagation or "enable" }}</defaultRouteTablePropagation>
+                <dnsSupport>{{ transit_gateway.options.DnsSupport or "enable" }}</dnsSupport>
+                <propagationDefaultRouteTableId>{{ transit_gateway.options.propagationDefaultRouteTableId or "enable" }}</propagationDefaultRouteTableId>
+                <vpnEcmpSupport>{{ transit_gateway.options.VpnEcmpSupport or "enable" }}</vpnEcmpSupport>
             </options>
         {% endif %}
-        {% if transit_gateway.tags %}
-            <tagSet>
-                {% for tag in transit_gateway.tags %}
-                    <item>
-                    <key>{{ tag['Key'] }}</key>
-                    <value>{{ tag['Value'] }}</value>
-                    </item>
-                {% endfor %}
-            </tagSet>
-        {% endif %}
+        <tagSet>
+            {% for tag in transit_gateway.get_tags() %}
+                <item>
+                    <key>{{ tag.key }}</key>
+                    <value>{{ tag.value }}</value>
+                </item>
+            {% endfor %}
+        </tagSet>
     </transitGateway>
 </CreateTransitGatewayResponse>
 """
@@ -74,14 +72,14 @@ DESCRIBE_TRANSIT_GATEWAY_RESPONSE = """<DescribeTransitGatewaysResponse xmlns="h
             <description>{{ transit_gateway.description if transit_gateway.description != None }}</description>
             {% if transit_gateway.options %}
                 <options>
-                    <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn }}</amazonSideAsn>
-                    <associationDefaultRouteTableId>tgw-rtb-002573ed1eEXAMPLE</associationDefaultRouteTableId>
-                    <autoAcceptSharedAttachments>{{ transit_gateway.options.AutoAcceptSharedAttachments }}</autoAcceptSharedAttachments>
-                    <defaultRouteTableAssociation>{{ transit_gateway.options.DefaultRouteTableAssociation }}</defaultRouteTableAssociation>
-                    <defaultRouteTablePropagation>{{ transit_gateway.options.DefaultRouteTablePropagation }}</defaultRouteTablePropagation>
-                    <dnsSupport>{{ transit_gateway.options.DnsSupport }}</dnsSupport>
-                    <propagationDefaultRouteTableId>tgw-rtb-002573ed1eEXAMPLE</propagationDefaultRouteTableId>
-                    <vpnEcmpSupport>{{ transit_gateway.options.VpnEcmpSupport }}</vpnEcmpSupport>
+                    <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn or "64512" }}</amazonSideAsn>
+                    <associationDefaultRouteTableId>{{ transit_gateway.options.AutoAcceptSharedAttachments or "tgw-rtb-0d571391e50cf8514" }}</associationDefaultRouteTableId>
+                    <autoAcceptSharedAttachments>{{ transit_gateway.options.AutoAcceptSharedAttachments or "disable" }}</autoAcceptSharedAttachments>
+                    <defaultRouteTableAssociation>{{ transit_gateway.options.DefaultRouteTableAssociation or "enable" }}</defaultRouteTableAssociation>
+                    <defaultRouteTablePropagation>{{ transit_gateway.options.DefaultRouteTablePropagation or "enable" }}</defaultRouteTablePropagation>
+                    <dnsSupport>{{ transit_gateway.options.DnsSupport or "enable" }}</dnsSupport>
+                    <propagationDefaultRouteTableId>{{ transit_gateway.options.propagationDefaultRouteTableId or "enable" }}</propagationDefaultRouteTableId>
+                    <vpnEcmpSupport>{{ transit_gateway.options.VpnEcmpSupport or "enable" }}</vpnEcmpSupport>
                 </options>
             {% endif %}
             <ownerId>{{ transit_gateway.owner_id }}</ownerId>
