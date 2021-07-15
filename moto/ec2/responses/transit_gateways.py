@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from re import T
 from moto.core.responses import BaseResponse
 from moto.ec2.utils import filters_from_querystring
 
