@@ -6011,6 +6011,13 @@ class TransitGatewayBackend(object):
     def delete_transit_gateway(self, transit_gateway_id):
         return self.transit_gateways.pop(transit_gateway_id)
 
+    def modify_transit_gateway(self, transit_gateway_id, description=None, options=None):
+        transit_gateway = self.transit_gateways.get(transit_gateway_id)
+        transit_gateway.description = description
+        if options is not None:
+            transit_gateway.options = options
+        return transit_gateway
+
 
 class NatGatewayBackend(object):
     def __init__(self):
