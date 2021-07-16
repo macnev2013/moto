@@ -6,7 +6,7 @@ from moto.ec2.utils import filters_from_querystring
 class TransitGateways(BaseResponse):
     def create_transit_gateway(self):
         description = self._get_param("Description") or None
-        options = self._get_multi_param_helper("Options")
+        options = self._get_multi_param_dict("Options")
         tags = self._get_multi_param("TagSpecification")
         tags = tags[0] if isinstance(tags, list) and len(tags) == 1 else tags
         tags = (tags or {}).get("Tag", [])
@@ -33,8 +33,7 @@ class TransitGateways(BaseResponse):
     def modify_transit_gateway(self):
         transit_gateway_id = self._get_param("TransitGatewayId")
         description = self._get_param("Description") or None
-        options = self._get_multi_param_helper("Options")
-
+        options = self._get_multi_param_dict("Options")
         transit_gateway = self.ec2_backend.modify_transit_gateway(
             transit_gateway_id=transit_gateway_id, description=description, options=options
         )
