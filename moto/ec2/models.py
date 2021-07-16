@@ -5915,6 +5915,48 @@ class TransitGateway(TaggedEC2Resource, CloudFormationModel):
         return transit_gateway
 
 
+class TransitGatewayBackend(object):
+    def __init__(self):
+        self.transit_gateways = {}
+        super(TransitGatewayBackend, self).__init__()
+
+    def create_transit_gateway(self, description=None, options=None, tags=[]):
+        transit_gateway = TransitGateway(self, description, options, tags)
+        self.transit_gateways[transit_gateway.id] = transit_gateway
+        return transit_gateway
+
+    def get_all_transit_gateways(self, filters):
+        transit_gateways = self.transit_gateways.values()
+
+        if filters is not None:
+            if filters.get("transit-gateway-id") is not None:
+                transit_gateways = [
+                    transit_gateway
+                    for transit_gateway in transit_gateways
+                    if transit_gateway.id in filters["transit-gateway-id"]
+                ]
+            if filters.get("state") is not None:
+                transit_gateways = [
+                    transit_gateway
+                    for transit_gateway in transit_gateways
+                    if transit_gateway.state in filters["state"]
+                ]
+
+        return transit_gateways
+
+    def delete_transit_gateway(self, transit_gateway_id):
+        return self.transit_gateways.pop(transit_gateway_id)
+
+    def modify_transit_gateway(self, transit_gateway_id, description=None, options=None):
+        transit_gateway = self.transit_gateways.get(transit_gateway_id)
+        if description:
+            transit_gateway.description = description
+        print("options insdde models:", options)
+        if options:
+            transit_gateway.options.update(options)
+        return transit_gateway
+
+
 class NatGateway(CloudFormationModel):
     def __init__(self, backend, subnet_id, allocation_id, tags=[]):
         # public properties
@@ -5977,46 +6019,6 @@ class NatGateway(CloudFormationModel):
             cloudformation_json["Properties"]["AllocationId"],
         )
         return nat_gateway
-
-
-class TransitGatewayBackend(object):
-    def __init__(self):
-        self.transit_gateways = {}
-        super(TransitGatewayBackend, self).__init__()
-
-    def create_transit_gateway(self, description=None, options=None, tags=[]):
-        transit_gateway = TransitGateway(self, description, options, tags)
-        self.transit_gateways[transit_gateway.id] = transit_gateway
-        return transit_gateway
-
-    def get_all_transit_gateways(self, filters):
-        transit_gateways = self.transit_gateways.values()
-
-        if filters is not None:
-            if filters.get("transit-gateway-id") is not None:
-                transit_gateways = [
-                    transit_gateway
-                    for transit_gateway in transit_gateways
-                    if transit_gateway.id in filters["transit-gateway-id"]
-                ]
-            if filters.get("state") is not None:
-                transit_gateways = [
-                    transit_gateway
-                    for transit_gateway in transit_gateways
-                    if transit_gateway.state in filters["state"]
-                ]
-
-        return transit_gateways
-
-    def delete_transit_gateway(self, transit_gateway_id):
-        return self.transit_gateways.pop(transit_gateway_id)
-
-    def modify_transit_gateway(self, transit_gateway_id, description=None, options=None):
-        transit_gateway = self.transit_gateways.get(transit_gateway_id)
-        transit_gateway.description = description
-        if options is not None:
-            transit_gateway.options = options
-        return transit_gateway
 
 
 class NatGatewayBackend(object):
