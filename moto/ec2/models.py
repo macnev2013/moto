@@ -5951,7 +5951,6 @@ class TransitGatewayBackend(object):
         transit_gateway = self.transit_gateways.get(transit_gateway_id)
         if description:
             transit_gateway.description = description
-        print("options insdde models:", options)
         if options:
             transit_gateway.options.update(options)
         return transit_gateway
