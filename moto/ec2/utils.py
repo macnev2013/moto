@@ -17,6 +17,7 @@ from moto.iam import iam_backends
 EC2_RESOURCE_TO_PREFIX = {
     "customer-gateway": "cgw",
     "transit-gateway": "tgw",
+    "transit-gateway-route-table": "tgw-rtb",
     "dhcp-options": "dopt",
     "flow-logs": "fl",
     "image": "ami",
@@ -172,6 +173,10 @@ def random_nat_gateway_id():
 
 def random_transit_gateway_id():
     return random_id(prefix=EC2_RESOURCE_TO_PREFIX["transit-gateway"], size=17)
+
+
+def random_transit_gateway_route_table_id():
+    return random_id(prefix=EC2_RESOURCE_TO_PREFIX["transit-gateway-route-table"], size=17)
 
 
 def random_launch_template_id():

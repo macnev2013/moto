@@ -125,6 +125,7 @@ from .utils import (
     random_internet_gateway_id,
     random_ip,
     random_ipv6_cidr,
+    random_transit_gateway_route_table_id,
     randor_ipv4_cidr,
     random_launch_template_id,
     random_nat_gateway_id,
@@ -5986,6 +5987,51 @@ class TransitGatewayBackend(object):
         return transit_gateway
 
 
+class TransitGatewayRouteTable(TaggedEC2Resource):
+    def __init__(
+        self,
+        transit_gateway_id,
+        tags=[],
+        default_association_route_table=False,
+        default_propagation_route_table=False,
+    ):
+        self.id = random_transit_gateway_route_table_id()
+        self.transit_gateway_id = transit_gateway_id
+
+        self._created_at = datetime.utcnow()
+
+        self.default_association_route_table = default_association_route_table
+        self.default_propagation_route_table = default_propagation_route_table
+        self.state = "available"
+        self.add_tags(tags or {})
+
+    @property
+    def create_time(self):
+        return iso_8601_datetime_with_milliseconds(self._created_at)
+
+
+class TransitGatewayRouteTableBackend(object):
+    def __init__(self):
+        self.transit_gateways_route_table = {}
+        super(TransitGatewayRouteTableBackend, self).__init__()
+
+    def create_transit_gateway_route_table(
+        self,
+        transit_gateway_id,
+        tags=[],
+        default_association_route_table=False,
+        default_propagation_route_table=False
+    ):
+        transit_gateways_route_table = TransitGatewayRouteTable(
+            transit_gateway_id=transit_gateway_id,
+            tags=tags,
+            default_association_route_table=default_association_route_table,
+            default_propagation_route_table=default_propagation_route_table
+        )
+        self.transit_gateways_route_table[transit_gateways_route_table.id] = transit_gateways_route_table
+        return transit_gateways_route_table
+
+
 class NatGateway(CloudFormationModel):
     def __init__(self, backend, subnet_id, allocation_id, tags=[]):
         # public properties
@@ -6346,6 +6392,7 @@ class EC2Backend(
     CustomerGatewayBackend,
     NatGatewayBackend,
     TransitGatewayBackend,
+    TransitGatewayRouteTableBackend,
     LaunchTemplateBackend,
     IamInstanceProfileAssociationBackend,
 ):
