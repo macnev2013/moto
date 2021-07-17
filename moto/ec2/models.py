@@ -5988,6 +5988,7 @@ class TransitGatewayBackend(object):
 
 
 class TransitGatewayRouteTable(TaggedEC2Resource):
+
     def __init__(
         self,
         transit_gateway_id,
@@ -6030,6 +6031,47 @@ class TransitGatewayRouteTableBackend(object):
         )
         self.transit_gateways_route_table[transit_gateways_route_table.id] = transit_gateways_route_table
         return transit_gateways_route_table
+
+    def get_all_transit_gateway_route_tables(self, filters):
+        transit_gateway_route_tables = self.transit_gateways_route_table.values()
+
+        if filters is not None:
+            if filters.get("default-association-route-table") is not None:
+                transit_gateway_route_tables = [
+                    transit_gateway_route_table
+                    for transit_gateway_route_table in transit_gateway_route_tables
+                    if transit_gateway_route_table.default_association_route_table in filters["default-association-route-table"]
+                ]
+
+            if filters.get("default-propagation-route-table") is not None:
+                transit_gateway_route_tables = [
+                    transit_gateway_route_table
+                    for transit_gateway_route_table in transit_gateway_route_tables
+                    if transit_gateway_route_table.default_propagation_route_table in filters["default-propagation-route-table"]
+                ]
+
+            if filters.get("state") is not None:
+                transit_gateway_route_tables = [
+                    transit_gateway_route_table
+                    for transit_gateway_route_table in transit_gateway_route_tables
+                    if transit_gateway_route_table.state in filters["state"]
+                ]
+
+            if filters.get("transit-gateway-id") is not None:
+                transit_gateway_route_tables = [
+                    transit_gateway_route_table
+                    for transit_gateway_route_table in transit_gateway_route_tables
+                    if transit_gateway_route_table.transit_gateway_id in filters["transit-gateway-id"]
+                ]
+
+            if filters.get("transit-gateway-route-table-id") is not None:
+                transit_gateway_route_tables = [
+                    transit_gateway_route_table
+                    for transit_gateway_route_table in transit_gateway_route_tables
+                    if transit_gateway_route_table.id in filters["transit-gateway-route-table-id"]
+                ]
+
+        return transit_gateway_route_tables
 
 
 class NatGateway(CloudFormationModel):
