@@ -5972,6 +5972,12 @@ class TransitGatewayBackend(object):
                     for transit_gateway in transit_gateways
                     if transit_gateway.state in filters["state"]
                 ]
+            if filters.get("owner-id") is not None:
+                transit_gateways = [
+                    transit_gateway
+                    for transit_gateway in transit_gateways
+                    if transit_gateway.owner_id in filters["owner-id"]
+                ]
 
         return transit_gateways
 
