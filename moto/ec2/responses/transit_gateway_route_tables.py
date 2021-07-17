@@ -33,14 +33,14 @@ class TransitGatewayRouteTable(BaseResponse):
 CREATE_TRANSIT_GATEWAY_ROUTE_TABLE_RESPONSE = """<CreateTransitGatewayRouteTableResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
     <requestId>3a495d25-08d4-466d-822e-477c9b1fc606</requestId>
     <transitGatewayRouteTable>
-        <creationTime>{{ transit_gateway_route_table._created_at }}</creationTime>
+        <creationTime>{{ transit_gateway_route_table.create_time }}</creationTime>
         <defaultAssociationRouteTable>{{ transit_gateway_route_table.default_association_route_table }}</defaultAssociationRouteTable>
         <defaultPropagationRouteTable>{{ transit_gateway_route_table.default_propagation_route_table }}</defaultPropagationRouteTable>
         <state>{{ transit_gateway_route_table.state }}</state>
         <transitGatewayId>{{ transit_gateway_route_table.transit_gateway_id }}</transitGatewayId>
         <transitGatewayRouteTableId>{{ transit_gateway_route_table.id }}</transitGatewayRouteTableId>
         <tagSet>
-            {% for tag in transit_gateway.get_tags() %}
+            {% for tag in transit_gateway_route_table.get_tags() %}
                 <item>
                     <key>{{ tag.key }}</key>
                     <value>{{ tag.value }}</value>
@@ -56,12 +56,12 @@ DESCRIBE_TRANSIT_GATEWAY_ROUTE_TABLE_RESPONSE = """<DescribeTransitGatewayRouteT
     <transitGatewayRouteTables>
         {% for transit_gateway_route_table in transit_gateway_route_tables %}
         <item>
-            <creationTime>{{ transit_gateway_route_table._created_at }}</creationTime>
+            <creationTime>{{ transit_gateway_route_table.create_time }}</creationTime>
             <defaultAssociationRouteTable>{{ transit_gateway_route_table.default_association_route_table }}</defaultAssociationRouteTable>
             <defaultPropagationRouteTable>{{ transit_gateway_route_table.default_propagation_route_table }}</defaultPropagationRouteTable>
             <state>{{ transit_gateway_route_table.state }}</state>
             <tagSet>
-                {% for tag in transit_gateway.get_tags() %}
+                {% for tag in transit_gateway_route_table.get_tags() %}
                     <item>
                         <key>{{ tag.key }}</key>
                         <value>{{ tag.value }}</value>
@@ -81,7 +81,7 @@ DELETE_TRANSIT_GATEWAY_ROUTE_TABLE_RESPONSE = """<DeleteTransitGatewayRouteTable
     <transitGatewayRouteTable>
         {% for transit_gateway_route_table in transit_gateway_route_tables %}
         <item>
-            <creationTime>{{ transit_gateway_route_table._created_at }}</creationTime>
+            <creationTime>{{ transit_gateway_route_table.create_time }}</creationTime>
             <defaultAssociationRouteTable>{{ transit_gateway_route_table.default_association_route_table }}</defaultAssociationRouteTable>
             <defaultPropagationRouteTable>{{ transit_gateway_route_table.default_propagation_route_table }}</defaultPropagationRouteTable>
             <state>{{ transit_gateway_route_table.state }}</state>

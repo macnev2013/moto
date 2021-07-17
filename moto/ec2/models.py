@@ -5997,11 +5997,13 @@ class TransitGatewayRouteTable(TaggedEC2Resource):
 
     def __init__(
         self,
+        backend,
         transit_gateway_id,
         tags=[],
         default_association_route_table=False,
         default_propagation_route_table=False,
     ):
+        self.ec2_backend = backend
         self.id = random_transit_gateway_route_table_id()
         self.transit_gateway_id = transit_gateway_id
 
@@ -6011,6 +6013,10 @@ class TransitGatewayRouteTable(TaggedEC2Resource):
         self.default_propagation_route_table = default_propagation_route_table
         self.state = "available"
         self.add_tags(tags or {})
+
+    @property
+    def physical_resource_id(self):
+        return self.id
 
     @property
     def create_time(self):
@@ -6030,6 +6036,7 @@ class TransitGatewayRouteTableBackend(object):
         default_propagation_route_table=False
     ):
         transit_gateways_route_table = TransitGatewayRouteTable(
+            self,
             transit_gateway_id=transit_gateway_id,
             tags=tags,
             default_association_route_table=default_association_route_table,
