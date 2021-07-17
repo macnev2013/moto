@@ -6045,8 +6045,15 @@ class TransitGatewayRouteTableBackend(object):
         self.transit_gateways_route_tables[transit_gateways_route_table.id] = transit_gateways_route_table
         return transit_gateways_route_table
 
-    def get_all_transit_gateway_route_tables(self, filters):
+    def get_all_transit_gateway_route_tables(self, transit_gateway_ids, filters):
         transit_gateway_route_tables = self.transit_gateways_route_tables.values()
+
+        if transit_gateway_ids is not None:
+            transit_gateway_route_tables = [
+                transit_gateway_route_table
+                for transit_gateway_route_table in transit_gateway_route_tables
+                if transit_gateway_route_table.id in transit_gateway_ids
+            ]
 
         if filters is not None:
             if filters.get("default-association-route-table") is not None:
