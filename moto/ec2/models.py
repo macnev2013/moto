@@ -6019,7 +6019,7 @@ class TransitGatewayRouteTable(TaggedEC2Resource):
 
 class TransitGatewayRouteTableBackend(object):
     def __init__(self):
-        self.transit_gateways_route_table = {}
+        self.transit_gateways_route_tables = {}
         super(TransitGatewayRouteTableBackend, self).__init__()
 
     def create_transit_gateway_route_table(
@@ -6035,11 +6035,11 @@ class TransitGatewayRouteTableBackend(object):
             default_association_route_table=default_association_route_table,
             default_propagation_route_table=default_propagation_route_table
         )
-        self.transit_gateways_route_table[transit_gateways_route_table.id] = transit_gateways_route_table
+        self.transit_gateways_route_tables[transit_gateways_route_table.id] = transit_gateways_route_table
         return transit_gateways_route_table
 
     def get_all_transit_gateway_route_tables(self, filters):
-        transit_gateway_route_tables = self.transit_gateways_route_table.values()
+        transit_gateway_route_tables = self.transit_gateways_route_tables.values()
 
         if filters is not None:
             if filters.get("default-association-route-table") is not None:
@@ -6078,6 +6078,9 @@ class TransitGatewayRouteTableBackend(object):
                 ]
 
         return transit_gateway_route_tables
+
+    def delete_transit_gateway_route_table(self, transit_gateway_route_table_id):
+        return self.transit_gateways_route_tables.pop(transit_gateway_route_table_id)
 
 
 class NatGateway(CloudFormationModel):

@@ -23,6 +23,12 @@ class TransitGatewayRouteTable(BaseResponse):
         template = self.response_template(DESCRIBE_TRANSIT_GATEWAY_ROUTE_TABLE_RESPONSE)
         return template.render(transit_gateway_route_tables=transit_gateway_route_tables)
 
+    def delete_transit_gateway_route_table(self):
+        transit_gateway_route_table_id = self._get_param("TransitGatewayRouteTableId")
+        transit_gateway_route_table = self.ec2_backend.delete_transit_gateway_route_table(transit_gateway_route_table_id)
+        template = self.response_template(DELETE_TRANSIT_GATEWAY_ROUTE_TABLE_RESPONSE)
+        return template.render(transit_gateway_route_table=transit_gateway_route_table)
+
 
 CREATE_TRANSIT_GATEWAY_ROUTE_TABLE_RESPONSE = """<CreateTransitGatewayRouteTableResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
     <requestId>3a495d25-08d4-466d-822e-477c9b1fc606</requestId>
@@ -68,4 +74,21 @@ DESCRIBE_TRANSIT_GATEWAY_ROUTE_TABLE_RESPONSE = """<DescribeTransitGatewayRouteT
         {% endfor %}
     </transitGatewayRouteTables>
 </DescribeTransitGatewayRouteTablesResponse>
+"""
+
+DELETE_TRANSIT_GATEWAY_ROUTE_TABLE_RESPONSE = """<DeleteTransitGatewayRouteTableResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
+    <requestId>a9a07226-c7b1-4305-9934-0bcfc3ef1c5e</requestId>
+    <transitGatewayRouteTable>
+        {% for transit_gateway_route_table in transit_gateway_route_tables %}
+        <item>
+            <creationTime>{{ transit_gateway_route_table._created_at }}</creationTime>
+            <defaultAssociationRouteTable>{{ transit_gateway_route_table.default_association_route_table }}</defaultAssociationRouteTable>
+            <defaultPropagationRouteTable>{{ transit_gateway_route_table.default_propagation_route_table }}</defaultPropagationRouteTable>
+            <state>{{ transit_gateway_route_table.state }}</state>
+            <transitGatewayId>{{ transit_gateway_route_table.transit_gateway_id }}</transitGatewayId>
+            <transitGatewayRouteTableId>{{ transit_gateway_route_table.id }}</transitGatewayRouteTableId>
+        </item>
+        {% endfor %}
+    </transitGatewayRouteTable>
+</DeleteTransitGatewayRouteTableResponse>
 """
