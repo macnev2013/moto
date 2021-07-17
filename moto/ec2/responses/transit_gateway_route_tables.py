@@ -6,7 +6,7 @@ from moto.ec2.utils import filters_from_querystring
 class TransitGatewayRouteTable(BaseResponse):
     def create_transit_gateway_route_table(self):
         transit_gateway_id = self._get_param("TransitGatewayId")
-        tags = self._get_multi_param("TagSpecification")
+        tags = self._get_multi_param("TagSpecifications")
         tags = tags[0] if isinstance(tags, list) and len(tags) == 1 else tags
         tags = (tags or {}).get("Tag", [])
         tags = {t["Key"]: t["Value"] for t in tags}

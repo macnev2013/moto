@@ -526,6 +526,9 @@ def random_key_pair():
 
 def get_prefix(resource_id):
     resource_id_prefix, separator, after = resource_id.partition("-")
+    if resource_id_prefix == EC2_RESOURCE_TO_PREFIX["transit-gateway"]:
+        if after.startswith("rtb"):
+            resource_id_prefix = EC2_RESOURCE_TO_PREFIX["transit-gateway-route-table"]
     if resource_id_prefix == EC2_RESOURCE_TO_PREFIX["network-interface"]:
         if after.startswith("attach"):
             resource_id_prefix = EC2_RESOURCE_TO_PREFIX["network-interface-attachment"]
