@@ -4,7 +4,7 @@ import copy
 import itertools
 import ipaddress
 import json
-from moto.moto.utilities.utils import merge_dicts
+from moto.utilities.utils import merge_dicts
 import os
 import re
 import six
