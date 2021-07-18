@@ -33,6 +33,8 @@ def load_resource(filename, as_json=True):
         return json.load(f) if as_json else f.read()
 
 
-def patch_dict(orig_dict, new_dict):
-    orig_dict.update(new_dict)
-    return orig_dict
+def merge_dicts(*args):
+    result = {}
+    for d in args:
+        result.update(d)
+    return result

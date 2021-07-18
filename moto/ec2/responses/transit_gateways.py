@@ -46,7 +46,7 @@ CREATE_TRANSIT_GATEWAY_RESPONSE = """<CreateTransitGatewayResponse xmlns="http:/
     <transitGateway>
         <transitGatewayId>{{ transit_gateway.id }}</transitGatewayId>
         <ownerId>{{ transit_gateway.owner_id }}</ownerId>
-        <description>{{ transit_gateway.description if transit_gateway.description != None }}</description>
+        <description>{{ transit_gateway.description or '' }}</description>
         <createTime>{{ transit_gateway.create_time }}</createTime>
         <state>{{ transit_gateway.state }}</state>
         {% if transit_gateway.options %}
@@ -80,7 +80,7 @@ DESCRIBE_TRANSIT_GATEWAY_RESPONSE = """<DescribeTransitGatewaysResponse xmlns="h
     {% for transit_gateway in transit_gateways %}
         <item>
             <creationTime>{{ transit_gateway.create_time }}</creationTime>
-            <description>{{ transit_gateway.description if transit_gateway.description != None }}</description>
+            <description>{{ transit_gateway.description or '' }}</description>
             {% if transit_gateway.options %}
             <options>
                 <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn }}</amazonSideAsn>
@@ -124,7 +124,7 @@ MODIFY_TRANSIT_GATEWAY_RESPONSE = """<ModifyTransitGatewaysResponse xmlns="http:
     <transitGatewaySet>
     <item>
         <creationTime>{{ transit_gateway.create_time }}</creationTime>
-        <description>{{ transit_gateway.description if transit_gateway.description != None }}</description>
+        <description>{{ transit_gateway.description or '' }}</description>
         {% if transit_gateway.options %}
         <options>
             <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn }}</amazonSideAsn>
