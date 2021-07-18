@@ -35,7 +35,7 @@ from moto.core.utils import (
 )
 from moto.core import ACCOUNT_ID
 from moto.kms import kms_backends
-from moto.utilities.utils import load_resource, patch_dict
+from moto.utilities.utils import load_resource
 from os import listdir
 
 from .exceptions import (
@@ -5924,7 +5924,7 @@ class TransitGateway(TaggedEC2Resource, CloudFormationModel):
         self.description = description
         self.state = "available"
         self.add_tags(tags or {})
-        self.options = merge_dicts(self.DEFAULT_OPTIONS, options)
+        self.options = merge_dicts(self.DEFAULT_OPTIONS, options or {})
         self._created_at = datetime.utcnow()
 
     @property
@@ -6209,7 +6209,7 @@ class TransitGatewayVpcAttachment(TransitGatewayAttachment):
 
         self.vpc_id = vpc_id
         self.subnet_ids = subnet_ids
-        self.options = patch_dict(self.DEFAULT_OPTIONS, options or {})
+        self.options = merge_dicts(self.DEFAULT_OPTIONS, options or {})
 
 
 class TransitGatewayAttachmentBackend(object):
