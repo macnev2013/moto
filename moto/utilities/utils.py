@@ -31,3 +31,8 @@ def load_resource(filename, as_json=True):
     """
     with open(filename, "r", encoding="utf-8") as f:
         return json.load(f) if as_json else f.read()
+
+
+def patch_dict(orig_dict, new_dict):
+    orig_dict.update(new_dict)
+    return orig_dict

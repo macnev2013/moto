@@ -34,7 +34,7 @@ from moto.core.utils import (
 )
 from moto.core import ACCOUNT_ID
 from moto.kms import kms_backends
-from moto.utilities.utils import load_resource
+from moto.utilities.utils import load_resource, patch_dict
 from os import listdir
 
 from .exceptions import (
@@ -125,6 +125,7 @@ from .utils import (
     random_internet_gateway_id,
     random_ip,
     random_ipv6_cidr,
+    random_transit_gateway_attachment_id,
     random_transit_gateway_route_table_id,
     randor_ipv4_cidr,
     random_launch_template_id,
@@ -5903,13 +5904,26 @@ class CustomerGatewayBackend(object):
 
 class TransitGateway(TaggedEC2Resource, CloudFormationModel):
 
+    DEFAULT_OPTIONS = {
+        "AmazonSideAsn": "64512",
+        "AssociationDefaultRouteTableId": "tgw-rtb-0d571391e50cf8514",
+        "AutoAcceptSharedAttachments": "disable",
+        "DefaultRouteTableAssociation": "enable",
+        "DefaultRouteTablePropagation": "enable",
+        "DnsSupport": "enable",
+        "MulticastSupport": "disable",
+        "PropagationDefaultRouteTableId": "enable",
+        "TransitGatewayCidrBlocks": None,
+        "VpnEcmpSupport": "enable"
+    }
+
     def __init__(self, backend, description=None, options=None, tags=[]):
         self.ec2_backend = backend
         self.id = random_transit_gateway_id()
         self.description = description
         self.state = "available"
         self.add_tags(tags or {})
-        self.options = options
+        self.options = patch_dict(self.DEFAULT_OPTIONS, options)
 
         self._created_at = datetime.utcnow()
 
@@ -5947,11 +5961,12 @@ class TransitGateway(TaggedEC2Resource, CloudFormationModel):
 
 
 class TransitGatewayBackend(object):
+
     def __init__(self):
         self.transit_gateways = {}
         super(TransitGatewayBackend, self).__init__()
 
-    def create_transit_gateway(self, description=None, options=None, tags=[]):
+    def create_transit_gateway(self, description=None, options={}, tags=[]):
         transit_gateway = TransitGateway(self, description, options, tags)
         self.transit_gateways[transit_gateway.id] = transit_gateway
         return transit_gateway
@@ -6126,6 +6141,98 @@ class TransitGatewayRouteTableBackend(object):
         if max_results:
             routes = routes[:int(max_results)]
         return routes
+
+
+class TransitGatewayAttachment(TaggedEC2Resource):
+
+    def __init__(
+        self,
+        backend,
+        resource_id,
+        resource_type,
+        transit_gateway_id,
+        tags=[]
+    ):
+
+        self.ec2_backend = backend
+        self.association = {}
+        self.resource_id = resource_id
+        self.resource_type = resource_type
+
+        self.id = random_transit_gateway_attachment_id()
+        self.transit_gateway_id = transit_gateway_id
+
+        self.state = "available"
+        self.add_tags(tags or {})
+
+        self._created_at = datetime.utcnow()
+
+    @property
+    def create_time(self):
+        return iso_8601_datetime_with_milliseconds(self._created_at)
+
+    @property
+    def resource_owner_id(self):
+        return ACCOUNT_ID
+
+    @property
+    def transit_gateway_owner_id(self):
+        return ACCOUNT_ID
+
+
+class TransitGatewayVpcAttachment(TransitGatewayAttachment):
+
+    DEFAULT_OPTIONS = {
+        "ApplianceModeSupport": "disable",
+        "DnsSupport": "enable",
+        "Ipv6Support": "disable"
+    }
+
+    def __init__(
+        self,
+        backend,
+        transit_gateway_id,
+        vpc_id,
+        subnet_ids,
+        tags=[],
+        options={}
+    ):
+
+        super().__init__(
+            backend=backend,
+            transit_gateway_id=transit_gateway_id,
+            resource_id=vpc_id,
+            resource_type="vpc",
+            tags=tags,
+        )
+
+        self.vpc_id = vpc_id
+        self.subnet_ids = subnet_ids
+        self.options = patch_dict(self.DEFAULT_OPTIONS, options)
+
+
+class TransitGatewayAttachmentBackend(object):
+    def __init__(self):
+        self.transit_gateways_attachments = {}
+        super(TransitGatewayAttachmentBackend, self).__init__()
+
+    def create_transit_gateway_vpc_attachment(
+        self,
+        transit_gateway_id,
+        vpc_id,
+        subnet_ids,
+        tags=[],
+        options={}
+    ):
+        transit_gateway_vpc_attachment = TransitGatewayVpcAttachment(
+            self,
+            transit_gateway_id=transit_gateway_id,
+            tags=tags,
+            vpc_id=vpc_id,
+            subnet_ids=subnet_ids,
+            options=options
+        )
+        return transit_gateway_vpc_attachment
 
 
 class NatGateway(CloudFormationModel):
@@ -6489,6 +6596,7 @@ class EC2Backend(
     NatGatewayBackend,
     TransitGatewayBackend,
     TransitGatewayRouteTableBackend,
+    TransitGatewayAttachmentBackend,
     LaunchTemplateBackend,
     IamInstanceProfileAssociationBackend,
 ):
