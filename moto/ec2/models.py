@@ -4,7 +4,6 @@ import copy
 import itertools
 import ipaddress
 import json
-from moto.utilities.utils import merge_dicts
 import os
 import re
 import six
@@ -35,7 +34,7 @@ from moto.core.utils import (
 )
 from moto.core import ACCOUNT_ID
 from moto.kms import kms_backends
-from moto.utilities.utils import load_resource
+from moto.utilities.utils import load_resource, merge_multiple_dicts
 from os import listdir
 
 from .exceptions import (
@@ -5913,7 +5912,7 @@ class TransitGateway(TaggedEC2Resource, CloudFormationModel):
         "DefaultRouteTablePropagation": "enable",
         "DnsSupport": "enable",
         "MulticastSupport": "disable",
-        "PropagationDefaultRouteTableId": "enable",
+        "PropagationDefaultRouteTableId": "tgw-rtb-0d571391e50cf8514",
         "TransitGatewayCidrBlocks": None,
         "VpnEcmpSupport": "enable"
     }
@@ -5924,7 +5923,7 @@ class TransitGateway(TaggedEC2Resource, CloudFormationModel):
         self.description = description
         self.state = "available"
         self.add_tags(tags or {})
-        self.options = merge_dicts(self.DEFAULT_OPTIONS, options or {})
+        self.options = merge_multiple_dicts(self.DEFAULT_OPTIONS, options or {})
         self._created_at = datetime.utcnow()
 
     @property
@@ -6209,7 +6208,7 @@ class TransitGatewayVpcAttachment(TransitGatewayAttachment):
 
         self.vpc_id = vpc_id
         self.subnet_ids = subnet_ids
-        self.options = merge_dicts(self.DEFAULT_OPTIONS, options or {})
+        self.options = merge_multiple_dicts(self.DEFAULT_OPTIONS, options or {})
 
 
 class TransitGatewayAttachmentBackend(object):

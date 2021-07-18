@@ -33,7 +33,7 @@ def load_resource(filename, as_json=True):
         return json.load(f) if as_json else f.read()
 
 
-def merge_dicts(*args):
+def merge_multiple_dicts(*args):
     result = {}
     for d in args:
         result.update(d)

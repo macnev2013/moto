@@ -52,12 +52,11 @@ CREATE_TRANSIT_GATEWAY_RESPONSE = """<CreateTransitGatewayResponse xmlns="http:/
         {% if transit_gateway.options %}
         <options>
             <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn }}</amazonSideAsn>
-            <associationDefaultRouteTableId>{{ transit_gateway.options.AutoAcceptSharedAttachments }}</associationDefaultRouteTableId>
             <autoAcceptSharedAttachments>{{ transit_gateway.options.AutoAcceptSharedAttachments }}</autoAcceptSharedAttachments>
             <defaultRouteTableAssociation>{{ transit_gateway.options.DefaultRouteTableAssociation }}</defaultRouteTableAssociation>
             <defaultRouteTablePropagation>{{ transit_gateway.options.DefaultRouteTablePropagation }}</defaultRouteTablePropagation>
             <dnsSupport>{{ transit_gateway.options.DnsSupport }}</dnsSupport>
-            <propagationDefaultRouteTableId>{{ transit_gateway.options.propagationDefaultRouteTableId }}</propagationDefaultRouteTableId>
+            <propagationDefaultRouteTableId>{{ transit_gateway.options.PropagationDefaultRouteTableId }}</propagationDefaultRouteTableId>
             <vpnEcmpSupport>{{ transit_gateway.options.VpnEcmpSupport }}</vpnEcmpSupport>
             <transitGatewayCidrBlocks>{{ transit_gateway.options.TransitGatewayCidrBlocks }}</transitGatewayCidrBlocks>
         </options>
@@ -84,12 +83,12 @@ DESCRIBE_TRANSIT_GATEWAY_RESPONSE = """<DescribeTransitGatewaysResponse xmlns="h
             {% if transit_gateway.options %}
             <options>
                 <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn }}</amazonSideAsn>
-                <associationDefaultRouteTableId>{{ transit_gateway.options.AutoAcceptSharedAttachments }}</associationDefaultRouteTableId>
+                <associationDefaultRouteTableId>{{ transit_gateway.options.AssociationDefaultRouteTableId }}</associationDefaultRouteTableId>
                 <autoAcceptSharedAttachments>{{ transit_gateway.options.AutoAcceptSharedAttachments }}</autoAcceptSharedAttachments>
                 <defaultRouteTableAssociation>{{ transit_gateway.options.DefaultRouteTableAssociation }}</defaultRouteTableAssociation>
                 <defaultRouteTablePropagation>{{ transit_gateway.options.DefaultRouteTablePropagation }}</defaultRouteTablePropagation>
                 <dnsSupport>{{ transit_gateway.options.DnsSupport }}</dnsSupport>
-                <propagationDefaultRouteTableId>{{ transit_gateway.options.propagationDefaultRouteTableId }}</propagationDefaultRouteTableId>
+                <propagationDefaultRouteTableId>{{ transit_gateway.options.PropagationDefaultRouteTableId }}</propagationDefaultRouteTableId>
                 <vpnEcmpSupport>{{ transit_gateway.options.VpnEcmpSupport }}</vpnEcmpSupport>
                 <transitGatewayCidrBlocks>{{ transit_gateway.options.TransitGatewayCidrBlocks }}</transitGatewayCidrBlocks>
             </options>
@@ -128,12 +127,12 @@ MODIFY_TRANSIT_GATEWAY_RESPONSE = """<ModifyTransitGatewaysResponse xmlns="http:
         {% if transit_gateway.options %}
         <options>
             <amazonSideAsn>{{ transit_gateway.options.AmazonSideAsn }}</amazonSideAsn>
-            <associationDefaultRouteTableId>{{ transit_gateway.options.AutoAcceptSharedAttachments }}</associationDefaultRouteTableId>
+            <associationDefaultRouteTableId>{{ transit_gateway.options.AssociationDefaultRouteTableId }}</associationDefaultRouteTableId>
             <autoAcceptSharedAttachments>{{ transit_gateway.options.AutoAcceptSharedAttachments }}</autoAcceptSharedAttachments>
             <defaultRouteTableAssociation>{{ transit_gateway.options.DefaultRouteTableAssociation }}</defaultRouteTableAssociation>
             <defaultRouteTablePropagation>{{ transit_gateway.options.DefaultRouteTablePropagation }}</defaultRouteTablePropagation>
             <dnsSupport>{{ transit_gateway.options.DnsSupport }}</dnsSupport>
-            <propagationDefaultRouteTableId>{{ transit_gateway.options.propagationDefaultRouteTableId }}</propagationDefaultRouteTableId>
+            <propagationDefaultRouteTableId>{{ transit_gateway.options.PropagationDefaultRouteTableId }}</propagationDefaultRouteTableId>
             <vpnEcmpSupport>{{ transit_gateway.options.VpnEcmpSupport }}</vpnEcmpSupport>
             <transitGatewayCidrBlocks>{{ transit_gateway.options.TransitGatewayCidrBlocks }}</transitGatewayCidrBlocks>
         </options>
