@@ -6214,6 +6214,7 @@ class TransitGatewayVpcAttachment(TransitGatewayAttachment):
 class TransitGatewayAttachmentBackend(object):
     def __init__(self):
         self.transit_gateways_attachments = {}
+        super(TransitGatewayAttachmentBackend, self).__init__()
 
     def create_transit_gateway_vpc_attachment(
         self,
