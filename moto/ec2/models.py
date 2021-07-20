@@ -6068,6 +6068,7 @@ class TransitGatewayRouteTable(TaggedEC2Resource):
         self.state = "available"
         self.routes = {}
         self.add_tags(tags or {})
+        self.route_table_association = {}
 
     @property
     def physical_resource_id(self):
@@ -6152,13 +6153,12 @@ class TransitGatewayRouteTableBackend(object):
             "destinationCidrBlock": destination_cidr_block,
             "prefixListId": "",
             "state": "blackhole" if blackhole else "active",
-            # TODO: needs to be fixed once we have support for transit gateway attachments
             "transitGatewayAttachments": {
-                "resourceId": "TODO",
-                "resourceType": "TODO",
+                "resourceId": self.transit_gateway_attachments.get(transit_gateway_attachment_id).resource_id,
+                "resourceType": self.transit_gateway_attachments.get(transit_gateway_attachment_id).resource_type,
                 "transitGatewayAttachmentId": transit_gateway_attachment_id,
             },
-            "type": "TODO",
+            "type": "static"
         }
         return transit_gateways_route_table
 
@@ -6194,6 +6194,14 @@ class TransitGatewayRouteTableBackend(object):
         if max_results:
             routes = routes[: int(max_results)]
         return routes
+
+    def set_route_table_association(self, transit_gateway_attachment_id, transit_gateway_route_table_id):
+        self.transit_gateways_route_tables[transit_gateway_route_table_id].route_table_association = {
+            'resourceId': self.transit_gateway_attachments[transit_gateway_attachment_id].resource_id,
+            'resourceType': self.transit_gateway_attachments[transit_gateway_attachment_id].resource_type,
+            'state': 'associated',
+            'transitGatewayAttachmentId': transit_gateway_attachment_id
+        }
 
 
 class TransitGatewayAttachment(TaggedEC2Resource):
@@ -6254,22 +6262,12 @@ class TransitGatewayVpcAttachment(TransitGatewayAttachment):
 
 class TransitGatewayAttachmentBackend(object):
     def __init__(self):
-        self.transit_gateways_attachments = {}
+        self.transit_gateway_attachments = {}
         super(TransitGatewayAttachmentBackend, self).__init__()
 
-    def create_transit_gateway_vpn_attachment(
-        self, vpn_id, transit_gateway_id, tags=[]
-    ):
-        transit_gateway_vpn_attachment = TransitGatewayAttachment(
-            self,
-            resource_id=vpn_id,
-            resource_type="vpn",
-            transit_gateway_id=transit_gateway_id,
-            tags=tags,
-        )
-        self.transit_gateways_attachments[
-            transit_gateway_vpn_attachment.id
-        ] = transit_gateway_vpn_attachment
+    def create_transit_gateway_vpn_attachment(self, vpn_id, transit_gateway_id, tags=[]):
+        transit_gateway_vpn_attachment = TransitGatewayAttachment(self, resource_id=vpn_id, resource_type="vpn", transit_gateway_id=transit_gateway_id, tags=tags)
+        self.transit_gateway_attachments[transit_gateway_vpn_attachment.id] = transit_gateway_vpn_attachment
         return transit_gateway_vpn_attachment
 
     def create_transit_gateway_vpc_attachment(
@@ -6283,15 +6281,11 @@ class TransitGatewayAttachmentBackend(object):
             subnet_ids=subnet_ids,
             options=options,
         )
-        self.transit_gateways_attachments[
-            transit_gateway_vpc_attachment.id
-        ] = transit_gateway_vpc_attachment
+        self.transit_gateway_attachments[transit_gateway_vpc_attachment.id] = transit_gateway_vpc_attachment
         return transit_gateway_vpc_attachment
 
-    def describe_transit_gateway_attachments(
-        self, transit_gateways_attachment_ids=None, filters=None, max_results=0
-    ):
-        transit_gateways_attachments = self.transit_gateways_attachments.values()
+    def describe_transit_gateway_attachments(self, transit_gateways_attachment_ids=None, filters=None, max_results=0):
+        transit_gateway_attachments = self.transit_gateway_attachments.values()
 
         attr_pairs = (
             ("resource-id", "resource_id"),
@@ -6299,10 +6293,10 @@ class TransitGatewayAttachmentBackend(object):
             ("transit-gateway-id", "transit_gateway_id"),
         )
 
-        if transit_gateways_attachment_ids:
-            transit_gateways_attachments = [
+        if not transit_gateways_attachment_ids == [] and transit_gateways_attachment_ids is not None:
+            transit_gateway_attachments = [
                 transit_gateways_attachment
-                for transit_gateways_attachment in transit_gateways_attachments
+                for transit_gateways_attachment in transit_gateway_attachments
                 if transit_gateways_attachment.id in transit_gateways_attachment_ids
             ]
 
@@ -6310,12 +6304,11 @@ class TransitGatewayAttachmentBackend(object):
             for attrs in attr_pairs:
                 values = filters.get(attrs[0]) or None
                 if values is not None:
-                    transit_gateways_attachments = [
-                        transit_gateways_attachment
-                        for transit_gateways_attachment in transit_gateways_attachments
+                    transit_gateway_attachments = [
+                        transit_gateways_attachment for transit_gateways_attachment in transit_gateway_attachments
                         if getattr(transit_gateways_attachment, attrs[1]) in values
                     ]
-        return transit_gateways_attachments
+        return transit_gateway_attachments
 
     def describe_transit_gateway_vpc_attachments(
         self, transit_gateways_attachment_ids=None, filters=None, max_results=0
@@ -6335,7 +6328,7 @@ class TransitGatewayAttachmentBackend(object):
         ):
             transit_gateways_attachments = [
                 transit_gateways_attachment
-                for transit_gateways_attachment in transit_gateways_attachments
+                for transit_gateways_attachment in transit_gateway_attachments
                 if transit_gateways_attachment.id in transit_gateways_attachment_ids
             ]
 
@@ -6349,7 +6342,37 @@ class TransitGatewayAttachmentBackend(object):
                         if getattr(transit_gateways_attachment, attrs[1]) in values
                     ]
 
-        return transit_gateways_attachments
+        return transit_gateway_attachments
+
+    def set_attachment_association(self, transit_gateway_attachment_id=None, transit_gateway_route_table_id=None):
+        self.transit_gateway_attachments[transit_gateway_attachment_id].association = {
+            "state": "associated",
+            "transitGatewayRouteTableId": transit_gateway_route_table_id
+        }
+
+
+class TransitGatewayAssociation(object):
+    # use transit_gateway_attachment_id as key for list of transit_gateway_association
+    def __init__(self, backend, transit_gateway_attachment_id=None, transit_gateway_route_table_id=None):
+        self.transit_gateway_attachment_id = transit_gateway_attachment_id
+        self.transit_gateway_route_table_id = transit_gateway_route_table_id
+        self.resource_id = backend.transit_gateway_attachments[transit_gateway_attachment_id].resource_id
+        self.resource_type = backend.transit_gateway_attachments[transit_gateway_attachment_id].resource_type
+        self.state = "associated"
+
+
+class TransitGatewayAssociationBackend(object):
+    def __init__(self):
+        self.transit_gateway_associations = {}
+        super(TransitGatewayAssociationBackend, self).__init__()
+
+    def associate_transit_gateway_route_table(self, transit_gateway_attachment_id=None, transit_gateway_route_table_id=None):
+        transit_gateway_association = TransitGatewayAssociation(self, transit_gateway_attachment_id, transit_gateway_route_table_id)
+        self.set_route_table_association(transit_gateway_attachment_id, transit_gateway_route_table_id)
+        self.set_attachment_association(transit_gateway_attachment_id, transit_gateway_route_table_id)
+        self.transit_gateway_associations[transit_gateway_attachment_id] = transit_gateway_association
+
+        return transit_gateway_association
 
 
 class NatGateway(CloudFormationModel):
@@ -6714,6 +6737,7 @@ class EC2Backend(
     TransitGatewayBackend,
     TransitGatewayRouteTableBackend,
     TransitGatewayAttachmentBackend,
+    TransitGatewayAssociationBackend,
     LaunchTemplateBackend,
     IamInstanceProfileAssociationBackend,
 ):

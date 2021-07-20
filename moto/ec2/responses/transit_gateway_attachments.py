@@ -55,6 +55,16 @@ class TransitGatewayAttachment(BaseResponse):
         template = self.response_template(DESCRIBE_TRANSIT_GATEWAY_ATTACHMENTS)
         return template.render(transit_gateway_attachments=transit_gateway_attachments)
 
+    def associate_transit_gateway_route_table(self):
+        transit_gateway_attachment_id = self._get_param('TransitGatewayAttachmentId')
+        transit_gateway_route_table_id = self._get_param('TransitGatewayRouteTableId')
+        transit_gateway_association = self.ec2_backend.associate_transit_gateway_route_table(
+            transit_gateway_attachment_id=transit_gateway_attachment_id,
+            transit_gateway_route_table_id=transit_gateway_route_table_id
+        )
+        template = self.response_template(TRANSIT_GATEWAY_ASSOCIATIONS)
+        return template.render(transit_gateway_association=transit_gateway_association)
+
 
 CREATE_TRANSIT_GATEWAY_VPC_ATTACHMENT = """<CreateTransitGatewayVpcAttachmentResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
         <requestId>9b5766ac-2af6-4b92-9a8a-4d74ae46ae79</requestId>
@@ -152,4 +162,17 @@ DESCRIBE_TRANSIT_GATEWAY_VPC_ATTACHMENTS = """<DescribeTransitGatewayVpcAttachme
         {% endfor %}
     </transitGatewayVpcAttachments>
 </DescribeTransitGatewayVpcAttachmentsResponse>
+"""
+
+
+TRANSIT_GATEWAY_ASSOCIATIONS = """<AssociateTransitGatewayRouteTableResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
+    <requestId>86a597cf-93ec-44a3-9559-4641863642a5</requestId>
+    <association>
+        <resourceId>{{ transit_gateway_association.resource_id }}</resourceId>
+        <resourceType>{{ transit_gateway_association.resource_type }}</resourceType>
+        <state>{{ transit_gateway_association.state }}</state>
+        <transitGatewayAttachmentId>{{ transit_gateway_association.transit_gateway_attachment_id }}</transitGatewayAttachmentId>
+        <transitGatewayRouteTableId>{{ transit_gateway_association.transit_gateway_route_table_id }}</transitGatewayRouteTableId>
+    </association>
+</AssociateTransitGatewayRouteTableResponse>
 """

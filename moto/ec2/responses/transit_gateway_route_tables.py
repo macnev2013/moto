@@ -155,6 +155,13 @@ CREATE_TRANSIT_GATEWAY_ROUTE_RESPONSE = """<?xml version="1.0" encoding="UTF-8"?
         <destinationCidrBlock>{{ transit_gateway_route_table.routes[destination_cidr_block]['destinationCidrBlock'] }}</destinationCidrBlock>
         <state>{{ transit_gateway_route_table.routes[destination_cidr_block]['state'] }}</state>
         <type>{{ transit_gateway_route_table.routes[destination_cidr_block]['type'] }}</type>
+        <transitGatewayAttachments>
+            <item>
+                <resourceId>{{ transit_gateway_route_table.routes[destination_cidr_block]['transitGatewayAttachments']['resourceId'] }}</resourceId>
+                <resourceType>{{ transit_gateway_route_table.routes[destination_cidr_block]['transitGatewayAttachments']['resourceType'] }}</resourceType>
+                <transitGatewayAttachmentId>{{ transit_gateway_route_table.routes[destination_cidr_block]['transitGatewayAttachments']['transitGatewayAttachmentId'] }}</transitGatewayAttachmentId>
+            </item>
+        </transitGatewayAttachments>
     </route>
 </CreateTransitGatewayRouteResponse>
 """
