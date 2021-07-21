@@ -65,6 +65,16 @@ class TransitGatewayAttachment(BaseResponse):
         template = self.response_template(TRANSIT_GATEWAY_ASSOCIATIONS)
         return template.render(transit_gateway_association=transit_gateway_association)
 
+    def enable_transit_gateway_route_table_propagation(self):
+        transit_gateway_attachment_id = self._get_param('TransitGatewayAttachmentId')
+        transit_gateway_route_table_id = self._get_param('TransitGatewayRouteTableId')
+        transit_gateway_propagation = self.ec2_backend.enable_transit_gateway_route_table_propagation(
+            transit_gateway_attachment_id=transit_gateway_attachment_id,
+            transit_gateway_route_table_id=transit_gateway_route_table_id
+        )
+        template = self.response_template(TRANSIT_GATEWAY_PROPAGATION)
+        return template.render(transit_gateway_propagation=transit_gateway_propagation)
+
 
 CREATE_TRANSIT_GATEWAY_VPC_ATTACHMENT = """<CreateTransitGatewayVpcAttachmentResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
         <requestId>9b5766ac-2af6-4b92-9a8a-4d74ae46ae79</requestId>
@@ -175,4 +185,17 @@ TRANSIT_GATEWAY_ASSOCIATIONS = """<AssociateTransitGatewayRouteTableResponse xml
         <transitGatewayRouteTableId>{{ transit_gateway_association.transit_gateway_route_table_id }}</transitGatewayRouteTableId>
     </association>
 </AssociateTransitGatewayRouteTableResponse>
+"""
+
+
+TRANSIT_GATEWAY_PROPAGATION = """<EnableTransitGatewayRouteTablePropagationResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
+    <requestId>c78427d4-e498-46ae-bc14-32841b16bff4</requestId>
+    <propagation>
+        <resourceId>{{ transit_gateway_propagation.resource_id }}</resourceId>
+        <resourceType>{{ transit_gateway_propagation.resource_type }}</resourceType>
+        <state>{{ transit_gateway_propagation.state }}</state>
+        <transitGatewayAttachmentId>{{ transit_gateway_propagation.transit_gateway_attachment_id }}</transitGatewayAttachmentId>
+        <transitGatewayRouteTableId>{{ transit_gateway_propagation.transit_gateway_route_table_id }}</transitGatewayRouteTableId>
+    </propagation>
+</EnableTransitGatewayRouteTablePropagationResponse>
 """
