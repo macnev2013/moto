@@ -6186,9 +6186,13 @@ class TransitGatewayRouteTableBackend(object):
     def search_transit_gateway_routes(self, transit_gateway_route_table_id, filters, max_results=None):
         transit_gateway_route_table = self.transit_gateways_route_tables.get(transit_gateway_route_table_id)
         if not transit_gateway_route_table:
+<<<<<<< HEAD
             raise
 >>>>>>> added support for transit-gateway-route-table-propagation
 
+=======
+            return []
+>>>>>>> added support for modify-transit-gateway-vpc-attachment
         attr_pairs = (
             ("type", "type"),
             ("state", "state"),
@@ -6430,6 +6434,26 @@ class TransitGatewayAttachmentBackend(object):
                     ]
 
         return transit_gateway_attachments
+
+    def modify_transit_gateway_vpc_attachment(
+        self,
+        add_subnet_ids=None,
+        options=None,
+        remove_subnet_ids=None,
+        transit_gateway_attachment_id=None
+    ):
+        if remove_subnet_ids:
+            self.transit_gateway_attachments[transit_gateway_attachment_id].subnet_ids = [
+                id for id in self.transit_gateway_attachments[transit_gateway_attachment_id].subnet_ids
+                if id not in remove_subnet_ids
+            ]
+        if options:
+            self.transit_gateway_attachments[transit_gateway_attachment_id].options.update(options)
+
+        if add_subnet_ids:
+            self.transit_gateway_attachments[transit_gateway_attachment_id].subnet_ids = add_subnet_ids
+
+        return self.transit_gateway_attachments[transit_gateway_attachment_id]
 
     def set_attachment_association(self, transit_gateway_attachment_id=None, transit_gateway_route_table_id=None):
         self.transit_gateway_attachments[transit_gateway_attachment_id].association = {
