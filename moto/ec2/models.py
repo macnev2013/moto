@@ -3378,11 +3378,20 @@ class PeeringConnectionStatus(object):
 
 
 class VPCPeeringConnection(TaggedEC2Resource, CloudFormationModel):
-    def __init__(self, vpc_pcx_id, vpc, peer_vpc):
+
+    DEFAULT_OPTIONS = {
+        "allowEgressFromLocalClassicLinkToRemoteVpc": False,
+        "allowEgressFromLocalVpcToRemoteClassicLink": True,
+        "allowDnsResolutionFromRemoteVpc": False
+    }
+
+    def __init__(self, backend, vpc_pcx_id, vpc, peer_vpc, tags=None, options=None):
         self.id = vpc_pcx_id
         self.vpc = vpc
         self.peer_vpc = peer_vpc
         self._status = PeeringConnectionStatus()
+        self.accepter_options = merge_multiple_dicts(self.DEFAULT_OPTIONS, options or {})
+        self.requester_options = merge_multiple_dicts(self.DEFAULT_OPTIONS, options or {})
 
     @staticmethod
     def cloudformation_name_type():
@@ -3410,6 +3419,12 @@ class VPCPeeringConnection(TaggedEC2Resource, CloudFormationModel):
     @property
     def physical_resource_id(self):
         return self.id
+
+    def set_accepter_options(self, options):
+        self.accepter_options = merge_multiple_dicts(self.DEFAULT_OPTIONS, options or {})
+
+    def set_requester_options(self, options):
+        self.requester_options = merge_multiple_dicts(self.DEFAULT_OPTIONS, options or {})
 
 
 class VPCPeeringConnectionBackend(object):
@@ -3475,6 +3490,12 @@ class VPCPeeringConnectionBackend(object):
         if vpc_pcx._status.code != "pending-acceptance":
             raise InvalidVPCPeeringConnectionStateTransitionError(vpc_pcx.id)
         vpc_pcx._status.reject()
+        return vpc_pcx
+
+    def modify_vpc_peering_connection_options(self, vpc_pcx_id, accepter_options, requester_options):
+        vpc_pcx = self.get_vpc_peering_connection(vpc_pcx_id)
+        vpc_pcx.set_accepter_options(accepter_options)
+        vpc_pcx.set_requester_options(requester_options)
         return vpc_pcx
 
 
