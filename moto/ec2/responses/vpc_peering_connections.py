@@ -45,6 +45,14 @@ class VPCPeeringConnections(BaseResponse):
         template = self.response_template(REJECT_VPC_PEERING_CONNECTION_RESPONSE)
         return template.render()
 
+    def modify_vpc_peering_connection_options(self):
+        vpc_pcx_id = self._get_param("VpcPeeringConnectionId")
+        accepter_options = self._get_multi_param_dict("AccepterPeeringConnectionOptions")
+        requester_options = self._get_multi_param_dict("RequesterPeeringConnectionOptions")
+        self.ec2_backend.modify_vpc_peering_connection_options(vpc_pcx_id, accepter_options, requester_options)
+        template = self.response_template(MODIFY_VPC_PEERING_CONNECTION_RESPONSE)
+        return template.render(accepter_options, requester_options)
+
 
 CREATE_VPC_PEERING_CONNECTION_RESPONSE = (
     """
@@ -187,3 +195,22 @@ REJECT_VPC_PEERING_CONNECTION_RESPONSE = """
   <return>true</return>
 </RejectVpcPeeringConnectionResponse>
 """
+
+MODIFY_VPC_PEERING_CONNECTION_RESPONSE = """
+<ModifyVpcPeeringConnectionOptionsResponse xmlns="http://ec2.amazonaws.com/doc/2016-11-15/">
+  <requestId>8d977c82-8aba-4cd1-81ca-example</requestId>
+  {% if accepter_options %}
+  <requesterPeeringConnectionOptions>
+    <allowDnsResolutionFromRemoteVpc>{{ accepter_options.AllowEgressFromLocalClassicLinkToRemoteVpc or '' }}</allowDnsResolutionFromRemoteVpc>
+    <allowEgressFromLocalClassicLinkToRemoteVpc>{{ accepter_options.AllowEgressFromLocalClassicLinkToRemoteVpc or '' }}</allowEgressFromLocalClassicLinkToRemoteVpc>
+    <allowEgressFromLocalVpcToRemoteClassicLink>{{ accepter_options.AllowEgressFromLocalVpcToRemoteClassicLink or '' }}</allowEgressFromLocalVpcToRemoteClassicLink>
+  </requesterPeeringConnectionOptions>
+  {% endif %}
+  {% if requester_options %}
+  <accepterPeeringConnectionOptions>
+    <allowDnsResolutionFromRemoteVpc>{{ requester_options.AllowEgressFromLocalClassicLinkToRemoteVpc or '' }}</allowDnsResolutionFromRemoteVpc>
+    <allowEgressFromLocalClassicLinkToRemoteVpc>{{ requester_options.AllowEgressFromLocalClassicLinkToRemoteVpc or '' }}</allowEgressFromLocalClassicLinkToRemoteVpc>
+    <allowEgressFromLocalVpcToRemoteClassicLink>{{ requester_options.AllowEgressFromLocalVpcToRemoteClassicLink or '' }}</allowEgressFromLocalVpcToRemoteClassicLink>
+  </accepterPeeringConnectionOptions>
+  {% endif %}
+</ModifyVpcPeeringConnectionOptionsResponse>"""
